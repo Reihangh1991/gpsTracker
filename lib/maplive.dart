@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:ffi';
+import 'dart:io';
+
 import 'package:cargpstracker/main.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -20,7 +24,7 @@ class _mapLiveState extends State<mapLive> {
   late MapboxMapController mapController;
   // ignore: unused_field
   late Timer _timer;
-  var currentIndex = 0;
+  var currentIndex = 1;
   var points = <LatLng>[
     new LatLng(41.025819, 29.230415),
     new LatLng(41.026198, 29.230873),
@@ -37,38 +41,51 @@ class _mapLiveState extends State<mapLive> {
 
   void _onMapCliked(LatLng latlon) {}
 
-  void fetch(index) async {
-    var request = http.MultipartRequest(
-        'POST', Uri.parse('http://185.208.175.202:1600/live/'));
-    request.fields.addAll({'id': '1'});
-    print('request start');
-    http.StreamedResponse response = await request.send();
+  Future<LatLng?> fetch(index) async {
+    try {
+      var request = http.MultipartRequest(
+          'POST', Uri.parse('http://185.208.175.202:1600/live/'));
+      request.fields.addAll({'id': index.toString()});
 
-    if (response.statusCode == 200) {
-      print(await response.stream.bytesToString());
-      // debugPrint(await response.stream.bytesToString());
-    } else {
-      print(response.reasonPhrase);
+      http.StreamedResponse response = await request.send();
+
+      if (response.statusCode == 200) {
+        final responseData = await response.stream.toBytes();
+        final responseString = String.fromCharCodes(responseData);
+        final json = jsonDecode(responseString);
+        String lat =
+            json["features"][0]["geometry"]["coordinates"][1].toString();
+        String lon =
+            json["features"][0]["geometry"]["coordinates"][0].toString();
+
+        return LatLng(double.parse(lat), double.parse(lon));
+      } else {
+        print(response.reasonPhrase);
+      }
+    } catch (error) {
+      print('Error add project $error');
+      return null;
     }
-
-    // return const
   }
 
   @override
   void initState() {
-    _timer = Timer.periodic(Duration(seconds: 3), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
         mapController.clearCircles();
         if (currentIndex < 6)
           currentIndex++;
         else
-          currentIndex = 0;
+          currentIndex = 1;
+        // pos = points[currentIndex];
 
-        pos = points[currentIndex];
-        // mapController.addCircle(
-            // CircleOptions(circleColor: 'blue', geometry: pos, circleRadius: 8));
+        fetch(currentIndex).then((value) => {
+              print(value),
+              mapController.addCircle(CircleOptions(
+                  circleColor: 'blue', geometry: value, circleRadius: 8))
+            });
       });
-      fetch(currentIndex);
+      // fetch(currentIndex);
       // print('ahamad');
     });
 
@@ -93,13 +110,13 @@ class _mapLiveState extends State<mapLive> {
                 accessToken: MyApp.ACCESS_TOKEN,
                 onMapCreated: _onMapCreated,
                 onMapClick: (point, latlng) {
-                  String msg =
-                      'lat = ${latlng.latitude} & lon = ${latlng.longitude}';
-                  print(msg);
-                  Fluttertoast.showToast(msg: msg);
+                  // String msg =
+                  //     'lat = ${latlng.latitude} & lon = ${latlng.longitude}';
+                  // print(msg);
+                  // Fluttertoast.showToast(msg: msg);
                 },
                 onStyleLoadedCallback: () => addCircle(mapController),
-                initialCameraPosition: CameraPosition(target: pos, zoom: 20)),
+                initialCameraPosition: CameraPosition(target: pos, zoom: 13)),
           ),
         ),
       ],
