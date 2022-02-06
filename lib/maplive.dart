@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:cargpstracker/main.dart';
@@ -43,6 +42,7 @@ class _mapLiveState extends State<mapLive> {
 
   Future<LatLng?> fetch(index) async {
     try {
+      print(index);
       var request = http.MultipartRequest(
           'POST', Uri.parse('http://185.208.175.202:1600/live/'));
       request.fields.addAll({'id': index.toString()});
@@ -58,6 +58,7 @@ class _mapLiveState extends State<mapLive> {
         String lon =
             json["features"][0]["geometry"]["coordinates"][0].toString();
 
+        // print(LatLng(double.parse(lat), double.parse(lon)));
         return LatLng(double.parse(lat), double.parse(lon));
       } else {
         print(response.reasonPhrase);
@@ -70,23 +71,19 @@ class _mapLiveState extends State<mapLive> {
 
   @override
   void initState() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
       setState(() {
-        mapController.clearCircles();
         if (currentIndex < 6)
           currentIndex++;
         else
           currentIndex = 1;
-        // pos = points[currentIndex];
-
-        fetch(currentIndex).then((value) => {
-              print(value),
-              mapController.addCircle(CircleOptions(
-                  circleColor: 'blue', geometry: value, circleRadius: 8))
-            });
       });
       // fetch(currentIndex);
-      // print('ahamad');
+      final LatLng? position = await fetch(currentIndex);
+
+      updateCircle(position!);
+      // mapController.addCircle(CircleOptions(
+      // circleColor: 'blue', geometry: position, circleRadius: 8));
     });
 
     super.initState();
@@ -95,6 +92,7 @@ class _mapLiveState extends State<mapLive> {
   @override
   void dispose() {
     mapController.dispose();
+    _timer.cancel();
     super.dispose();
   }
 
@@ -116,11 +114,19 @@ class _mapLiveState extends State<mapLive> {
                   // Fluttertoast.showToast(msg: msg);
                 },
                 onStyleLoadedCallback: () => addCircle(mapController),
-                initialCameraPosition: CameraPosition(target: pos, zoom: 13)),
+                initialCameraPosition: CameraPosition(target: pos, zoom: 15)),
           ),
         ),
       ],
     );
+  }
+
+  void updateCircle(LatLng newPos) {
+    mapController.clearCircles();
+    // CameraUpdate cameraUpdate = CameraUpdate.newLatLngZoom(newPos, 11);
+    // mapController.moveCamera(cameraUpdate);
+    mapController.addCircle(
+        CircleOptions(circleColor: 'blue', geometry: newPos, circleRadius: 8));
   }
 
   void addCircle(MapboxMapController controller) {

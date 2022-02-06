@@ -107,67 +107,7 @@ class _SettingState extends State<Setting>
               ),
               child: mapLive(),
             )),
-        Flexible(
-          flex: 2,
-          child: Column(
-            children: <Widget>[
-              Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    CupertinoButton(
-                      child: Text(
-                        'لغو',
-                        style: TextStyle(
-                          fontFamily: 'Dana',
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                    CupertinoButton(
-                      child: Text(
-                        'تایید',
-                        style: TextStyle(
-                          fontFamily: 'Dana',
-                        ),
-                      ),
-                      onPressed: () {
-                        // Navigator.of(context)
-                        //     .pop(tempPickedDate ?? Jalali.now());
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              Divider(
-                height: 0,
-                thickness: 1,
-              ),
-              Expanded(
-                child: Container(
-                  child: CupertinoTheme(
-                    data: CupertinoThemeData(
-                      textTheme: CupertinoTextThemeData(
-                        dateTimePickerTextStyle: TextStyle(fontFamily: "Dana"),
-                      ),
-                    ),
-                    child: PCupertinoDatePicker(
-                      mode: PCupertinoDatePickerMode.dateAndTime,
-                      onDateTimeChanged: (Jalali dateTime) {
-                        tempPickedDate = dateTime;
-
-                        print(Timestamp.fromDate(tempPickedDate.toDateTime()));
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        )
-      ],
+             ],
     ));
   }
 

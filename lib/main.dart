@@ -1,4 +1,5 @@
-
+import 'package:cargpstracker/MainTabScreens/history.dart';
+import 'package:cargpstracker/MainTabScreens/setting.dart';
 import 'package:cargpstracker/bottonTabs.dart';
 import 'package:flutter/material.dart';
 
@@ -6,7 +7,7 @@ void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-static const String ACCESS_TOKEN =
+  static const String ACCESS_TOKEN =
       'pk.eyJ1Ijoic2FhbWV6b2ppIiwiYSI6ImNrejc1cndiaTAwcjQyb3BiY3Q1a2RobmsifQ.dadvuGlP92fg1_vPacqAIQ';
   static const appTitle = 'Drawer Demo';
 
@@ -48,10 +49,10 @@ class MyHomePage extends StatelessWidget {
             ListTile(
               title: const Text('Item 1'),
               onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Setting()),
+                );
               },
             ),
             ListTile(
